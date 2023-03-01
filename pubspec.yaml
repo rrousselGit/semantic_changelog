@@ -1,0 +1,10 @@
+name: semantic_changelog
+description: A continuous deployment tool based on a changelog-first approach (as opposed to relying on commits).
+repository: https://github.com/rrousselGit/semantic_changelog
+issue_tracker: https://github.com/rrousselGit/semantic_changelog/issues
+funding:
+  - https://github.com/sponsors/rrousselGit/
+version: 1.0.0-dev
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
