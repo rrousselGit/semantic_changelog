@@ -2,6 +2,10 @@ Welcome to semantic_changelog!
 
 This repository is a set of tools designed to do package versioning using changelogs.
 
+It is primarily designed for maintaining my own packages, as it is the convention
+I use for Riverpod/Freezed/...
+But feel free to clone this and use it~
+
 ## Motivation
 
 When maintaining large open-source projects (often mono-repositories), dealing
@@ -41,7 +45,7 @@ In short, when writing a PR, the PR must include a changelog entry matching
 the following:
 
 ```md
-## Unreleased <major/minor/patch>
+## Unreleased <breaking/major/minor/patch>
 
 /_ insert description about the changes one by this PR _/
 
