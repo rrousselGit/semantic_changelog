@@ -9,7 +9,7 @@ import 'package:path/path.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
-import 'packages.dart';
+import '../packages.dart';
 
 /// The "bump" command.
 class BumpCommand extends Command<void> {

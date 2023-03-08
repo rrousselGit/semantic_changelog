@@ -1,5 +1,5 @@
 import 'package:args/command_runner.dart';
-import 'package:semantic_changelog/src/bump.dart';
+import 'package:semantic_changelog/src/commands/bump.dart';
 
 void main(List<String> args) => _SemanticChangelogCommandRunner().run(args);
 
