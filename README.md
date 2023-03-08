@@ -83,3 +83,52 @@ we could have:
 At the same time, this approach can be easily validated in the CI.  
 A CI could check that a changelog is modified if a package is modified,
 and that the changelog starts with `## Unreleased <flag>`
+
+## Installing the command lines (Dart only)
+
+This convention comes with a Dart command line for applying it to Dart projects.  
+You can install it with `dart pub global activate -s git https://github.com/rrousselGit/semantic_changelog/`.
+
+### Updating package versions
+
+To update pubspec.yamls, you can run:
+
+```sh
+# Look-up for all projects in the current folder, and based on their changelog
+# update the package versions
+version bump
+```
+
+Example of output:
+
+```
+$ version bump
+The following packages have been updated:
+riverpod            : 2.3.0 -> 2.3.1
+flutter_riverpod    : 2.3.0 -> 2.3.1
+hooks_riverpod      : 2.3.0 -> 2.3.1
+```
+
+### Publishing new versions to git/pub
+
+Once your pubspecs have been updated, you can publish the changes with:
+
+```sh
+# After running "version bump", you can now run this command to both "git tag"
+# and publish modified packages to pub.dev.
+version publish
+```
+
+Example of output:
+
+```
+$ version publish
+The following packages will be published:
+riverpod            : (2.3.1)
+flutter_riverpod    : (2.3.1)
+hooks_riverpod      : (2.3.1)
+✔ Continue? (y/N) ‥ y
+✓ riverpod
+✓ flutter_riverpod
+✓ hooks_riverpod
+```
