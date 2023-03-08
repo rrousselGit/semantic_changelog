@@ -89,7 +89,7 @@ class PublishCommand extends Command<void> {
           '(${ansi.blue}${packageToPublish.package.version}${ansi.noColor})';
 
       final trailing = packageToPublish.isFirstPublish
-          ? ' ${ansi.green}First version published on pub${ansi.noColor}'
+          ? ' ${ansi.green}First publish${ansi.noColor}'
           : '';
 
       buffer.writeln(
