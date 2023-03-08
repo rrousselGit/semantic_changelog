@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cli_util/cli_logging.dart';
 import 'package:collection/collection.dart';
@@ -121,8 +122,6 @@ extension on Package {
 
     // TODO handle "name:" placed after dependencies & co
 
-    print('Updating ${versionNode?.value} ${newVersion}');
-
     if (versionNode != null) {
       edits.add(
         _Edit(
@@ -136,9 +135,6 @@ extension on Package {
     for (final dependencyChange in dependencyChanges) {
       void editDependency(MapEntry<dynamic, YamlNode>? dependency) {
         if (dependency == null) return;
-        print(
-          '$name: Update ${dependencyChange.package.name} to ${dependencyChange.newVersion}',
-        );
 
         final value = dependency.value.value;
         // Not a version number. Likely a git/path dependency.
@@ -176,14 +172,6 @@ extension on Package {
       editDependency(devDependency);
       editDependency(dependencyOverride);
     }
-
-    print('Edits for ${name}');
-    for (final edit in edits) {
-      print(
-        '${pubspecContent.substring(edit.start, edit.end)} -> ${edit.content}',
-      );
-    }
-    print('');
 
     final newPubspecContent = StringBuffer();
     var lastOffset = 0;
@@ -302,10 +290,6 @@ void main() async {
       _PackageUpdateType.patch,
     );
 
-    print(
-      '${package.name} caused by:\n${dependencyChanges.map((e) => '- ${e.package.name}').join('\n')}',
-    );
-
     // Patch the changelog to add a new section for the new version
     update.changelogPatch = _Patch(
       () async => package.changelog.writeAsString(
@@ -320,8 +304,6 @@ ${await package.changelog.readAsString()}
     );
 
     update.dependencyChanges.addAll(dependencyChanges);
-
-    // print('${package.name} // ${package.dependenciesInWorkspace.keys}');
   });
 
   await Future.wait(
@@ -339,6 +321,24 @@ ${await package.changelog.readAsString()}
         )
         .whereNotNull(),
   );
+
+  _logChanges(versionBumps);
+}
+
+void _logChanges(Map<String, _PackageUpdate> versionBumps) {
+  final longestPackageNameLength =
+      versionBumps.keys.map((e) => e.length).reduce(max);
+
+  final buffer = StringBuffer(
+    'The following packages have been updated:\n',
+  );
+  for (final update in versionBumps.values) {
+    buffer.writeln(
+      '${update.package.name.padRight(longestPackageNameLength)} : ${update.package.version} -> ${update.newVersion}',
+    );
+  }
+
+  stdout.write(buffer.toString());
 }
 
 Future<List<Package>> _findPackages() async {
