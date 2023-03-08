@@ -1,9 +1,17 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
 import 'package:cli_util/cli_logging.dart';
+import 'package:collection/collection.dart';
 import 'package:melos/melos.dart';
+import 'package:path/path.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:yaml/yaml.dart';
+
+import 'changelog.dart';
 
 /// Visits the packages in dependency order.
 ///
@@ -56,4 +64,124 @@ class _Entry<T> extends LinkedListEntry<_Entry<T>> {
   _Entry(this.value);
 
   final T value;
+}
+
+extension on Object? {
+  R? safeCast<R>() {
+    final that = this;
+    if (that is R) return that;
+    return null;
+  }
+}
+
+extension on YamlMap {
+  MapEntry<dynamic, YamlNode>? findEntry(String key) {
+    return nodes.entries.firstWhereOrNull((e) => e.key.toString() == key);
+  }
+}
+
+class _Edit {
+  _Edit(this.start, this.end, this.content);
+
+  final int start;
+  final int end;
+  final String content;
+}
+
+extension PackageMeta on Package {
+  File get pubspecFile => File(join(path, 'pubspec.yaml'));
+
+  File get changelog => File(join(path, 'CHANGELOG.md'));
+
+  Future<void> updatePubspec(
+    Version newVersion, {
+    required Set<PackageUpdate> dependencyChanges,
+  }) async {
+    final edits = <_Edit>[];
+
+    final pubspecContent = await pubspecFile.readAsString();
+    final pubspecYaml = loadYamlNode(
+      pubspecContent,
+      sourceUrl: pubspecFile.uri,
+    );
+
+    final versionNode = pubspecYaml.safeCast<YamlMap>()?.findEntry('version');
+
+    final dependenciesNode = pubspecYaml
+        .safeCast<YamlMap>()
+        ?.nodes['dependencies']
+        .safeCast<YamlMap>();
+    final devDependenciesNode = pubspecYaml
+        .safeCast<YamlMap>()
+        ?.nodes['dev_dependencies']
+        .safeCast<YamlMap>();
+    final dependencyOverridesNode = pubspecYaml
+        .safeCast<YamlMap>()
+        ?.nodes['dependency_overrides']
+        .safeCast<YamlMap>();
+
+    // TODO handle "name:" placed after dependencies & co
+
+    if (versionNode != null) {
+      edits.add(
+        _Edit(
+          versionNode.value.span.start.offset,
+          versionNode.value.span.end.offset,
+          newVersion.toString(),
+        ),
+      );
+    }
+
+    for (final dependencyChange in dependencyChanges) {
+      void editDependency(MapEntry<dynamic, YamlNode>? dependency) {
+        if (dependency == null) return;
+
+        final value = dependency.value.value;
+        // Not a version number. Likely a git/path dependency.
+        if (value is! String) return;
+
+        VersionConstraint currentVersion;
+        try {
+          currentVersion = VersionConstraint.parse(value);
+        } catch (err) {
+          // Failed to parse the version, ignoring.
+          return;
+        }
+
+        final isTightConstraints = currentVersion == version;
+
+        edits.add(
+          _Edit(
+            dependency.value.span.start.offset,
+            dependency.value.span.end.offset,
+            isTightConstraints
+                ? dependencyChange.newVersion.toString()
+                : '^${dependencyChange.newVersion}',
+          ),
+        );
+      }
+
+      final dependency =
+          dependenciesNode?.findEntry(dependencyChange.package.name);
+      final devDependency =
+          devDependenciesNode?.findEntry(dependencyChange.package.name);
+      final dependencyOverride =
+          dependencyOverridesNode?.findEntry(dependencyChange.package.name);
+
+      editDependency(dependency);
+      editDependency(devDependency);
+      editDependency(dependencyOverride);
+    }
+
+    final newPubspecContent = StringBuffer();
+    var lastOffset = 0;
+    for (final edit in edits) {
+      newPubspecContent.write(pubspecContent.substring(lastOffset, edit.start));
+      newPubspecContent.write(edit.content);
+      lastOffset = edit.end;
+    }
+    newPubspecContent.write(pubspecContent.substring(lastOffset));
+
+    await pubspecFile.writeAsString(newPubspecContent.toString());
+  }
 }

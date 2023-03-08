@@ -20,3 +20,4 @@ dependencies:
 
 executables:
   semantic_changelog:
+  version: semantic_changelog
