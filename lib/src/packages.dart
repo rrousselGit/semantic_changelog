@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cli_util/cli_logging.dart';
@@ -92,6 +93,50 @@ extension PackageMeta on Package {
   File get pubspecFile => File(join(path, 'pubspec.yaml'));
 
   File get changelog => File(join(path, 'CHANGELOG.md'));
+
+  String get gitTagName => '$name-v$version';
+
+  Future<void> publish() async {
+    final result = await Process.run(
+      'dart',
+      ['pub', 'publish', '--force'],
+      workingDirectory: path,
+      stderrEncoding: utf8,
+    );
+
+    if (result.exitCode != 0) {
+      throw Exception(result.stderr);
+    }
+  }
+
+  Future<void> tag() async {
+    final result = await Process.run(
+      'git',
+      ['tag', gitTagName],
+      workingDirectory: path,
+      stderrEncoding: utf8,
+    );
+
+    if (result.exitCode != 0) {
+      throw Exception(result.stderr);
+    }
+  }
+
+  Future<bool> hasTag() async {
+    final result = await Process.run(
+      'git',
+      ['tag', '-l', gitTagName],
+      workingDirectory: path,
+      stdoutEncoding: utf8,
+      stderrEncoding: utf8,
+    );
+
+    if (result.exitCode != 0) {
+      throw Exception(result.stderr);
+    }
+
+    return result.stdout.toString().isNotEmpty;
+  }
 
   Future<void> updatePubspec(
     Version newVersion, {
