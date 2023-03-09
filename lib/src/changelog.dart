@@ -84,9 +84,7 @@ class PackageUpdate {
       case PackageUpdateType.major:
         return package.version.nextMajor;
       case PackageUpdateType.minor:
-        return package.version.minor == 0
-            ? package.version.nextPatch
-            : package.version.nextMinor;
+        return package.version.nextMinor;
       case PackageUpdateType.patch:
         return package.version.nextPatch;
     }
