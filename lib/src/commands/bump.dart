@@ -4,6 +4,9 @@ import 'dart:math';
 
 import 'package:args/command_runner.dart';
 import 'package:collection/collection.dart';
+import 'package:melos/melos.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec/pubspec.dart';
 
 import '../changelog.dart';
 import '../packages.dart';
@@ -80,11 +83,14 @@ class BumpCommand extends Command<void> {
 
       if (dependencyChanges.isEmpty) return;
 
+      final lockedDependencyChanges =
+          _findLockedDependencyChanges(package, dependencyChanges);
+
       // If a dependency has a version bump, we need to bump the version of this
       // package as well.
       update = versionBumps[package.name] = PackageUpdate(
         package,
-        PackageUpdateType.patch,
+        lockedDependencyChanges ?? PackageUpdateType.patch,
       );
 
       if (package.changelog.existsSync()) {
@@ -106,4 +112,38 @@ class BumpCommand extends Command<void> {
     });
     return versionBumps;
   }
+}
+
+extension on Package {
+  bool isLockedWithDependency(String dependencyName) {
+    return isLockedWithDependencyReference(
+          pubSpec.dependencies[dependencyName],
+        ) ||
+        isLockedWithDependencyReference(
+          pubSpec.devDependencies[dependencyName],
+        );
+  }
+
+  bool isLockedWithDependencyReference(
+    DependencyReference? dependencyReference,
+  ) {
+    if (dependencyReference is! HostedReference) return false;
+
+    return dependencyReference.versionConstraint is Version;
+  }
+}
+
+PackageUpdateType? _findLockedDependencyChanges(
+  Package package,
+  List<PackageUpdate> dependencyChanges,
+) {
+  PackageUpdateType? result;
+  for (final lockedDependency in dependencyChanges
+      .where((e) => package.isLockedWithDependency(e.package.name))) {
+    if (result != null && result != lockedDependency.type) return null;
+
+    result = lockedDependency.type;
+  }
+
+  return result;
 }
