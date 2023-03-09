@@ -87,18 +87,20 @@ class BumpCommand extends Command<void> {
         PackageUpdateType.patch,
       );
 
-      // Patch the changelog to add a new section for the new version
-      update.changelogPatch = Patch(
-        () async => package.changelog.writeAsString(
-          '''
+      if (package.changelog.existsSync()) {
+        // Patch the changelog to add a new section for the new version
+        update.changelogPatch = Patch(
+          () async => package.changelog.writeAsString(
+            '''
     ${update!.newVersionChangelogHeader}
     
     ${dependencyChanges.map((e) => '- `${e.package.name}` upgraded to `${e.newVersion}`').join('\n')}
     
     ${await package.changelog.readAsString()}
     ''',
-        ),
-      );
+          ),
+        );
+      }
 
       update.dependencyChanges.addAll(dependencyChanges);
     });
