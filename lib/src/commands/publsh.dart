@@ -38,10 +38,10 @@ class PublishCommand extends Command<void> {
   Future<void> _publishPackages(List<_PackagePublish> packagesToPublish) async {
     for (final packageToPublish in packagesToPublish) {
       try {
+        await packageToPublish.package.publish();
         if (!await packageToPublish.package.hasTag()) {
           await packageToPublish.package.tag();
         }
-        await packageToPublish.package.publish();
         stdout.writeln(
           '${ansi.green}✓${ansi.noColor} ${packageToPublish.package.name}',
         );
