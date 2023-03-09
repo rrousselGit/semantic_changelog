@@ -61,7 +61,8 @@ class PackageUpdate {
     final update = PackageUpdate(package, updateType);
 
     // Patch the changelog to replace the Unrelased with the version number
-    final newChangelog = StringBuffer(update.newVersionChangelogHeader);
+    final newChangelog = StringBuffer();
+    newChangelog.writeln(update.newVersionChangelogHeader);
     changelogContent.skip(1).forEach(newChangelog.writeln);
 
     update.changelogPatch = Patch(
