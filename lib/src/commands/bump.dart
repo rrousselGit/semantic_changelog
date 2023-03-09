@@ -103,8 +103,7 @@ ${update!.newVersionChangelogHeader}
 
 ${dependencyChanges.map((e) => '- `${e.package.name}` upgraded to `${e.newVersion}`').join('\n')}
 
-${await package.changelog.readAsString()}
-    ''',
+${await package.changelog.readAsString()}''',
             ),
           );
         }
