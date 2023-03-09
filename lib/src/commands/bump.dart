@@ -72,7 +72,7 @@ class BumpCommand extends Command<void> {
       var update = await PackageUpdate.tryParse(package);
       if (update != null) {
         versionBumps[package.name] = update;
-        return;
+        // We continue to compute dependency changes in case, if any
       }
 
       // Check if any of the dependencies has a version bump
@@ -86,26 +86,28 @@ class BumpCommand extends Command<void> {
       final lockedDependencyChanges =
           _findLockedDependencyChanges(package, dependencyChanges);
 
-      // If a dependency has a version bump, we need to bump the version of this
-      // package as well.
-      update = versionBumps[package.name] = PackageUpdate(
-        package,
-        lockedDependencyChanges ?? PackageUpdateType.patch,
-      );
+      if (update == null) {
+        // If a dependency has a version bump, we need to bump the version of this
+        // package as well.
+        update = versionBumps[package.name] = PackageUpdate(
+          package,
+          lockedDependencyChanges ?? PackageUpdateType.patch,
+        );
 
-      if (package.changelog.existsSync()) {
-        // Patch the changelog to add a new section for the new version
-        update.changelogPatch = Patch(
-          () async => package.changelog.writeAsString(
-            '''
+        if (package.changelog.existsSync()) {
+          // Patch the changelog to add a new section for the new version
+          update.changelogPatch = Patch(
+            () async => package.changelog.writeAsString(
+              '''
 ${update!.newVersionChangelogHeader}
 
 ${dependencyChanges.map((e) => '- `${e.package.name}` upgraded to `${e.newVersion}`').join('\n')}
 
 ${await package.changelog.readAsString()}
     ''',
-          ),
-        );
+            ),
+          );
+        }
       }
 
       update.dependencyChanges.addAll(dependencyChanges);
