@@ -65,10 +65,6 @@ class BumpCommand extends Command<void> {
     final versionBumps = <String, PackageUpdate>{};
 
     await visitPackagesInDependencyOrder((package) async {
-      if (package.pubSpec.publishTo.toString() == 'none') {
-        return;
-      }
-
       var update = await PackageUpdate.tryParse(package);
       if (update != null) {
         versionBumps[package.name] = update;
