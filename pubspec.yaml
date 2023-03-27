@@ -10,7 +10,7 @@ environment:
   sdk: ">=2.18.0 <3.0.0"
 
 dependencies:
-  ansi: ^0.0.1
+  ansi: ">=0.0.1 <0.3.0"
   args: ^2.4.0
   cli_util: ^0.3.5
   collection: ^1.17.1
