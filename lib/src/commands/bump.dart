@@ -84,7 +84,9 @@ class BumpCommand extends Command<void> {
 
       if (update == null) {
         // If a dependency has a version bump, we need to bump the version of this
-        // package as well.
+        // package as well. But only do so if the pubspec of the package
+        // has a version number.
+        if (package.pubSpec.version == null) return;
         update = versionBumps[package.name] = PackageUpdate(
           package,
           lockedDependencyChanges ?? PackageUpdateType.patch,
