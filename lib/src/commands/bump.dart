@@ -21,6 +21,10 @@ class BumpCommand extends Command<void> {
   String get name => 'bump';
 
   void _logChanges(Map<String, PackageUpdate> versionBumps) {
+    if (versionBumps.isEmpty) {
+      stdout.writeln('No packages have been updated.');
+      return;
+    }
     final longestPackageNameLength =
         versionBumps.keys.map((e) => e.length).reduce(max);
 

@@ -62,7 +62,7 @@ Future<List<Package>> findPackages() async {
     );
     return workspace.allPackages.values.toList();
   } on MelosException catch (e) {
-    Logger.standard().stderr(e.toString());
+    stderr.writeln(e.toString());
     return [];
   }
 }
