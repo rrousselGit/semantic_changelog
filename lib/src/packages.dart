@@ -53,12 +53,18 @@ Future<void> visitPackagesInDependencyOrder(
 
 /// Lists all the packages within the current directory.
 Future<List<Package>> findPackages() async {
-  final configs = await MelosWorkspaceConfig.fromWorkspaceRoot(Directory.current);
-  final workspace = await MelosWorkspace.fromConfig(
-    configs,
-    logger: MelosLogger(Logger.standard()),
-  );
-  return workspace.allPackages.values.toList();
+  try {
+    final configs =
+        await MelosWorkspaceConfig.fromWorkspaceRoot(Directory.current);
+    final workspace = await MelosWorkspace.fromConfig(
+      configs,
+      logger: MelosLogger(Logger.standard()),
+    );
+    return workspace.allPackages.values.toList();
+  } on MelosException catch (e) {
+    Logger.standard().stderr(e.toString());
+    return [];
+  }
 }
 
 class _Entry<T> extends LinkedListEntry<_Entry<T>> {
