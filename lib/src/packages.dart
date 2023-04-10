@@ -53,7 +53,7 @@ Future<void> visitPackagesInDependencyOrder(
 
 /// Lists all the packages within the current directory.
 Future<List<Package>> findPackages() async {
-  final configs = await MelosWorkspaceConfig.fromDirectory(Directory.current);
+  final configs = await MelosWorkspaceConfig.fromWorkspaceRoot(Directory.current);
   final workspace = await MelosWorkspace.fromConfig(
     configs,
     logger: MelosLogger(Logger.standard()),
