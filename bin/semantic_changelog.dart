@@ -1,6 +1,6 @@
 import 'package:args/command_runner.dart';
 import 'package:semantic_changelog/src/commands/bump.dart';
-import 'package:semantic_changelog/src/commands/publsh.dart';
+import 'package:semantic_changelog/src/commands/publish.dart';
 
 void main(List<String> args) => _SemanticChangelogCommandRunner().run(args);
 
