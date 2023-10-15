@@ -3,28 +3,56 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:melos/melos.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import 'packages.dart';
 
-enum PackageUpdateType {
-  breaking,
-  major,
-  minor,
-  patch;
+part 'changelog.freezed.dart';
+
+sealed class _FlaggedPackageUpdateType {
+  String? get flag;
+}
+
+@freezed
+sealed class PackageUpdateType with _$PackageUpdateType {
+  @Implements<_FlaggedPackageUpdateType>()
+  const factory PackageUpdateType.breaking({String? flag}) = _Breaking;
+  @Implements<_FlaggedPackageUpdateType>()
+  const factory PackageUpdateType.major({String? flag}) = _Major;
+  @Implements<_FlaggedPackageUpdateType>()
+  const factory PackageUpdateType.minor({String? flag}) = _Minor;
+  @Implements<_FlaggedPackageUpdateType>()
+  const factory PackageUpdateType.patch({String? flag}) = _Patch;
+  const factory PackageUpdateType.version(Version version) = _Version;
 
   static PackageUpdateType fromString(String? value) {
-    switch (value) {
+    final split = value?.split(' ')?..removeWhere((e) => e.isEmpty);
+
+    final bump = split?.firstOrNull;
+    if (bump == null) {
+      throw ArgumentError.value(value, 'value');
+    }
+
+    try {
+      return PackageUpdateType.version(Version.parse(bump));
+    } catch (e) {
+      // Failed to parse the update as a version number, continue
+    }
+
+    final flag = split?.elementAtOrNull(2);
+
+    switch (split?.firstOrNull) {
       case 'breaking':
-        return PackageUpdateType.breaking;
+        return PackageUpdateType.breaking(flag: flag);
       case 'major':
-        return PackageUpdateType.major;
+        return PackageUpdateType.major(flag: flag);
       case 'minor':
-        return PackageUpdateType.minor;
+        return PackageUpdateType.minor(flag: flag);
       case 'fix':
       case 'patch':
-        return PackageUpdateType.patch;
+        return PackageUpdateType.patch(flag: flag);
       default:
         throw ArgumentError.value(value, 'value');
     }
@@ -79,14 +107,23 @@ class PackageUpdate {
 
   late final Version newVersion = () {
     switch (type) {
-      case PackageUpdateType.breaking:
-        return package.version.nextBreaking;
-      case PackageUpdateType.major:
-        return package.version.nextMajor;
-      case PackageUpdateType.minor:
-        return package.version.nextMinor;
-      case PackageUpdateType.patch:
-        return package.version.nextPatch;
+      case _Version(:final version):
+        return version;
+
+      case final _FlaggedPackageUpdateType type:
+        final flaglessNewVersion = switch (type) {
+          _Breaking() => package.version.nextBreaking,
+          _Major() => package.version.nextMajor,
+          _Minor() => package.version.nextMinor,
+          _Patch() => package.version.nextPatch,
+        };
+
+        return Version(
+          flaglessNewVersion.major,
+          flaglessNewVersion.minor,
+          flaglessNewVersion.patch,
+          pre: type.flag,
+        );
     }
   }();
 

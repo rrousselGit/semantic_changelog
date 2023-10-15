@@ -78,11 +78,11 @@ class _$PubVersionResponseCopyWithImpl<$Res, $Val extends PubVersionResponse>
 }
 
 /// @nodoc
-abstract class _$$_PubVersionResponseCopyWith<$Res>
+abstract class _$$PubVersionResponseImplCopyWith<$Res>
     implements $PubVersionResponseCopyWith<$Res> {
-  factory _$$_PubVersionResponseCopyWith(_$_PubVersionResponse value,
-          $Res Function(_$_PubVersionResponse) then) =
-      __$$_PubVersionResponseCopyWithImpl<$Res>;
+  factory _$$PubVersionResponseImplCopyWith(_$PubVersionResponseImpl value,
+          $Res Function(_$PubVersionResponseImpl) then) =
+      __$$PubVersionResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({PubVersion latest, List<PubVersion> versions});
@@ -92,11 +92,11 @@ abstract class _$$_PubVersionResponseCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$_PubVersionResponseCopyWithImpl<$Res>
-    extends _$PubVersionResponseCopyWithImpl<$Res, _$_PubVersionResponse>
-    implements _$$_PubVersionResponseCopyWith<$Res> {
-  __$$_PubVersionResponseCopyWithImpl(
-      _$_PubVersionResponse _value, $Res Function(_$_PubVersionResponse) _then)
+class __$$PubVersionResponseImplCopyWithImpl<$Res>
+    extends _$PubVersionResponseCopyWithImpl<$Res, _$PubVersionResponseImpl>
+    implements _$$PubVersionResponseImplCopyWith<$Res> {
+  __$$PubVersionResponseImplCopyWithImpl(_$PubVersionResponseImpl _value,
+      $Res Function(_$PubVersionResponseImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -105,7 +105,7 @@ class __$$_PubVersionResponseCopyWithImpl<$Res>
     Object? latest = null,
     Object? versions = null,
   }) {
-    return _then(_$_PubVersionResponse(
+    return _then(_$PubVersionResponseImpl(
       latest: null == latest
           ? _value.latest
           : latest // ignore: cast_nullable_to_non_nullable
@@ -120,14 +120,14 @@ class __$$_PubVersionResponseCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_PubVersionResponse extends _PubVersionResponse {
-  _$_PubVersionResponse(
+class _$PubVersionResponseImpl extends _PubVersionResponse {
+  _$PubVersionResponseImpl(
       {required this.latest, required final List<PubVersion> versions})
       : _versions = versions,
         super._();
 
-  factory _$_PubVersionResponse.fromJson(Map<String, dynamic> json) =>
-      _$$_PubVersionResponseFromJson(json);
+  factory _$PubVersionResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PubVersionResponseImplFromJson(json);
 
   @override
   final PubVersion latest;
@@ -148,7 +148,7 @@ class _$_PubVersionResponse extends _PubVersionResponse {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_PubVersionResponse &&
+            other is _$PubVersionResponseImpl &&
             (identical(other.latest, latest) || other.latest == latest) &&
             const DeepCollectionEquality().equals(other._versions, _versions));
   }
@@ -161,13 +161,13 @@ class _$_PubVersionResponse extends _PubVersionResponse {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_PubVersionResponseCopyWith<_$_PubVersionResponse> get copyWith =>
-      __$$_PubVersionResponseCopyWithImpl<_$_PubVersionResponse>(
+  _$$PubVersionResponseImplCopyWith<_$PubVersionResponseImpl> get copyWith =>
+      __$$PubVersionResponseImplCopyWithImpl<_$PubVersionResponseImpl>(
           this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_PubVersionResponseToJson(
+    return _$$PubVersionResponseImplToJson(
       this,
     );
   }
@@ -176,11 +176,11 @@ class _$_PubVersionResponse extends _PubVersionResponse {
 abstract class _PubVersionResponse extends PubVersionResponse {
   factory _PubVersionResponse(
       {required final PubVersion latest,
-      required final List<PubVersion> versions}) = _$_PubVersionResponse;
+      required final List<PubVersion> versions}) = _$PubVersionResponseImpl;
   _PubVersionResponse._() : super._();
 
   factory _PubVersionResponse.fromJson(Map<String, dynamic> json) =
-      _$_PubVersionResponse.fromJson;
+      _$PubVersionResponseImpl.fromJson;
 
   @override
   PubVersion get latest;
@@ -188,7 +188,7 @@ abstract class _PubVersionResponse extends PubVersionResponse {
   List<PubVersion> get versions;
   @override
   @JsonKey(ignore: true)
-  _$$_PubVersionResponseCopyWith<_$_PubVersionResponse> get copyWith =>
+  _$$PubVersionResponseImplCopyWith<_$PubVersionResponseImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -241,22 +241,22 @@ class _$PubVersionCopyWithImpl<$Res, $Val extends PubVersion>
 }
 
 /// @nodoc
-abstract class _$$_PubVersionCopyWith<$Res>
+abstract class _$$PubVersionImplCopyWith<$Res>
     implements $PubVersionCopyWith<$Res> {
-  factory _$$_PubVersionCopyWith(
-          _$_PubVersion value, $Res Function(_$_PubVersion) then) =
-      __$$_PubVersionCopyWithImpl<$Res>;
+  factory _$$PubVersionImplCopyWith(
+          _$PubVersionImpl value, $Res Function(_$PubVersionImpl) then) =
+      __$$PubVersionImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call({@VersionConverter() Version version});
 }
 
 /// @nodoc
-class __$$_PubVersionCopyWithImpl<$Res>
-    extends _$PubVersionCopyWithImpl<$Res, _$_PubVersion>
-    implements _$$_PubVersionCopyWith<$Res> {
-  __$$_PubVersionCopyWithImpl(
-      _$_PubVersion _value, $Res Function(_$_PubVersion) _then)
+class __$$PubVersionImplCopyWithImpl<$Res>
+    extends _$PubVersionCopyWithImpl<$Res, _$PubVersionImpl>
+    implements _$$PubVersionImplCopyWith<$Res> {
+  __$$PubVersionImplCopyWithImpl(
+      _$PubVersionImpl _value, $Res Function(_$PubVersionImpl) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
@@ -264,7 +264,7 @@ class __$$_PubVersionCopyWithImpl<$Res>
   $Res call({
     Object? version = null,
   }) {
-    return _then(_$_PubVersion(
+    return _then(_$PubVersionImpl(
       version: null == version
           ? _value.version
           : version // ignore: cast_nullable_to_non_nullable
@@ -275,11 +275,11 @@ class __$$_PubVersionCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$_PubVersion implements _PubVersion {
-  _$_PubVersion({@VersionConverter() required this.version});
+class _$PubVersionImpl implements _PubVersion {
+  _$PubVersionImpl({@VersionConverter() required this.version});
 
-  factory _$_PubVersion.fromJson(Map<String, dynamic> json) =>
-      _$$_PubVersionFromJson(json);
+  factory _$PubVersionImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PubVersionImplFromJson(json);
 
   @override
   @VersionConverter()
@@ -294,7 +294,7 @@ class _$_PubVersion implements _PubVersion {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_PubVersion &&
+            other is _$PubVersionImpl &&
             (identical(other.version, version) || other.version == version));
   }
 
@@ -305,12 +305,12 @@ class _$_PubVersion implements _PubVersion {
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_PubVersionCopyWith<_$_PubVersion> get copyWith =>
-      __$$_PubVersionCopyWithImpl<_$_PubVersion>(this, _$identity);
+  _$$PubVersionImplCopyWith<_$PubVersionImpl> get copyWith =>
+      __$$PubVersionImplCopyWithImpl<_$PubVersionImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_PubVersionToJson(
+    return _$$PubVersionImplToJson(
       this,
     );
   }
@@ -318,16 +318,16 @@ class _$_PubVersion implements _PubVersion {
 
 abstract class _PubVersion implements PubVersion {
   factory _PubVersion({@VersionConverter() required final Version version}) =
-      _$_PubVersion;
+      _$PubVersionImpl;
 
   factory _PubVersion.fromJson(Map<String, dynamic> json) =
-      _$_PubVersion.fromJson;
+      _$PubVersionImpl.fromJson;
 
   @override
   @VersionConverter()
   Version get version;
   @override
   @JsonKey(ignore: true)
-  _$$_PubVersionCopyWith<_$_PubVersion> get copyWith =>
+  _$$PubVersionImplCopyWith<_$PubVersionImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

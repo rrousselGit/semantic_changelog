@@ -83,13 +83,13 @@ class BumpCommand extends Command<void> {
           _findLockedDependencyChanges(package, dependencyChanges);
 
       if (update == null) {
-        // If a dependency has a version bump, we need to bump the version of this
-        // package as well. But only do so if the pubspec of the package
-        // has a version number.
+        // If a package has no updates but some dependency changes, we need to
+        // bump the version of this package to match. But only do so if the
+        // pubspec of the package has a version number.
         if (package.pubSpec.version == null) return;
         update = versionBumps[package.name] = PackageUpdate(
           package,
-          lockedDependencyChanges ?? PackageUpdateType.patch,
+          lockedDependencyChanges ?? const PackageUpdateType.patch(),
         );
 
         if (package.changelog.existsSync()) {

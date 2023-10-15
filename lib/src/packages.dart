@@ -61,7 +61,7 @@ Future<List<Package>> findPackages() async {
   return workspace.allPackages.values.toList();
 }
 
-class _Entry<T> extends LinkedListEntry<_Entry<T>> {
+final class _Entry<T> extends LinkedListEntry<_Entry<T>> {
   _Entry(this.value);
 
   final T value;
