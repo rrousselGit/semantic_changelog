@@ -41,7 +41,7 @@ sealed class PackageUpdateType with _$PackageUpdateType {
       // Failed to parse the update as a version number, continue
     }
 
-    final flag = split?.elementAtOrNull(2);
+    final flag = split?.elementAtOrNull(1);
 
     switch (split?.firstOrNull) {
       case 'breaking':
