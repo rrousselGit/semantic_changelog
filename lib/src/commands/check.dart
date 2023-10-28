@@ -22,7 +22,7 @@ class CheckCommand extends Command<void> {
 
   @override
   FutureOr<void>? run() async {
-    final branchName = argResults?.arguments.firstOrNull ?? 'master';
+    final branchName = argResults?.arguments.firstOrNull;
     final changedFiles = await computeChangedPaths(branchName);
 
     await _groupChangedFiles(changedFiles);

@@ -1,11 +1,11 @@
 import 'process.dart';
 
-Future<List<String>> computeChangedPaths(
-  String sha1,
-) async {
+Future<List<String>> computeChangedPaths([
+  String? sha1,
+]) async {
   final result = await safeRun(
     'git',
-    ['diff', '--name-only', sha1],
+    ['diff', '--name-only', if (sha1 != null) sha1],
   );
 
   return result.stdout
