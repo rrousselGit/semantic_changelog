@@ -88,7 +88,7 @@ class PackageUpdate {
     final updateType = PackageUpdateType.fromString(flag);
     final update = PackageUpdate(package, updateType);
 
-    // Patch the changelog to replace the Unrelased with the version number
+    // Patch the changelog to replace the Unreleased with the version number
     final newChangelog = StringBuffer();
     newChangelog.writeln(update.newVersionChangelogHeader);
     changelogContent.skip(1).forEach(newChangelog.writeln);

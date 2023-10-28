@@ -11,7 +11,7 @@ But feel free to clone this and use it~
 When maintaining large open-source projects (often mono-repositories), dealing
 with version bump can be tedious.  
 One common issue is dealing with dependencies. For example, a package `a` may
-depend on a packge `b`. Then, when incrementing the version of `b`, we also need to
+depend on a package `b`. Then, when incrementing the version of `b`, we also need to
 update the dependency of `b` in the `a` package.
 
 There are tools to help with this, such as conventional_commits. The problem is
@@ -22,13 +22,13 @@ There are a number of problems with this approach:
 - In a mono-repository, one PR may affect multiple packages at once in a different way.
   For example, this PR can both require a 0.0.x bump for one package, but
   require a x.0.0 bump for another package.
-  Using convential_commits, this would require using separate commits for these changes.
+  Using conventional_commits, this would require using separate commits for these changes.
   This is tedious to do and doesn't quite match the typical developer workflow.
 
 - Having a clean commit history can be difficult.
   Asking contributors to an OSS package to rewrite the git history of their PR
   for the sake of package versioning can add a significant burden to contributors.
-  This is also very error prone, and a mistake could easily slip by durign reviews.
+  This is also very error prone, and a mistake could easily slip by during reviews.
 
 - The semantic commit approach does not promote reviewing changelogs during PR reviews.
   Changelogs are core to users of a package. But by relying on commits to generate a
@@ -107,6 +107,33 @@ The following packages have been updated:
 riverpod            : 2.3.0 -> 2.3.1
 flutter_riverpod    : 2.3.0 -> 2.3.1
 hooks_riverpod      : 2.3.0 -> 2.3.1
+```
+
+### Asserting that a Pull Request contains the necessary CHANGELOG updates
+
+Chances are you will want to automate checking in pull-requests that
+CHANGELOG files are correctly modified.
+
+For this, you can run:
+
+```sh
+version check main
+```
+
+This will compare your current git branch with the "main" branch.
+And if a package is modified but does not contain a CHANGELOG entry,
+then this command will fail:
+
+```
+$ version check
+Changes detected for package `riverpod_generator` at `packages/riverpod_generator`, no CHANGELOG.md entry found.
+Please add a CHANGELOG.md entry for this package.
+
+Changed files (total 28):
+  packages/riverpod_generator/integration/build_yaml/README.md
+  packages/riverpod_generator/integration/build_yaml/pubspec.yaml
+  packages/riverpod_generator/lib/src/parse_generator.dart
+  ...
 ```
 
 ### Publishing new versions to git/pub
