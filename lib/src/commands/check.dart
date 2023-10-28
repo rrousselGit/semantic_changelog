@@ -45,9 +45,8 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
     );
 
     if (enclosingPubspec == null) {
-      throw ArgumentError(
-        'Detected changed file $changedFile, but could not find an associated pubspec.yaml.',
-      );
+      // No enclosing pubspec.yaml found, this change is not in a package.
+      continue;
     }
 
     pubspecForChanges.add(
