@@ -126,8 +126,9 @@ then this command will fail:
 
 ```
 $ version check
-Changes detected for package `riverpod_generator` at `packages/riverpod_generator`, no CHANGELOG.md entry found.
+Changes detected for package `riverpod_generator` at `packages/riverpod_generator`, but no CHANGELOG.md entry found.
 Please add a CHANGELOG.md entry for this package.
+To do so, start the CHANGELOG.md with `## Unreleased major/minor/patch` and explain the changes introduced.
 
 Changed files (total 28):
   packages/riverpod_generator/integration/build_yaml/README.md

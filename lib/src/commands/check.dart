@@ -76,11 +76,15 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
 
       if (update == null) {
         stderr.writeln(
-          'Changes detected for package `${package.name.red()}` at `${package.pathRelativeToWorkspace}`, '
-          'no ${'CHANGELOG.md'.green()} entry found.\n'
-          'Please add a ${'CHANGELOG.md'.green()} entry for this package.\n\n'
-          'Changed files (total ${changes.length}):\n'
-          '${changes.map((e) => '  $e\n').join()}\n',
+          '''
+Changes detected for package `${package.name.red()}` at `${package.pathRelativeToWorkspace}`, but no ${'CHANGELOG.md'.green()} entry found.
+Please add a ${'CHANGELOG.md'.green()} entry for this package.
+To do so, start the CHANGELOG.md with `## Unreleased major/minor/patch` and explain the changes introduced.
+
+Changed files (total ${changes.length}):
+${changes.map((e) => '  $e\n').join()}
+          
+''',
         );
         exitCode = 1;
         return;
