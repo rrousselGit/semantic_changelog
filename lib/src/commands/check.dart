@@ -74,7 +74,7 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
 
     if (changes.isNotEmpty) {
       // Check if the CHANGELOG.md of this package was modified.
-      if (!changes.any((e) => p.equals(e, package.changelog.path))) {
+      if (!changedFiles.any((e) => p.equals(e, package.changelog.path))) {
         stderr.writeln(
           '''
 Changes detected for package `${package.name.red()}` at `${package.pathRelativeToWorkspace}`, but no ${'CHANGELOG.md'.green()} entry found.
