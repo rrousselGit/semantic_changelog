@@ -89,7 +89,8 @@ class BumpCommand extends Command<void> {
         if (package.pubSpec.version == null) return;
         update = versionBumps[package.name] = PackageUpdate(
           package,
-          lockedDependencyChanges ?? const PackageUpdateType.patch(),
+          lockedDependencyChanges ??
+              PackageUpdateType.dependencyChange(package.pubSpec.version!),
         );
 
         if (package.changelog.existsSync()) {

@@ -22,6 +22,7 @@ mixin _$PackageUpdateType {
     required TResult Function(String? flag) major,
     required TResult Function(String? flag) minor,
     required TResult Function(String? flag) patch,
+    required TResult Function() build,
     required TResult Function(Version version) version,
   }) =>
       throw _privateConstructorUsedError;
@@ -31,6 +32,7 @@ mixin _$PackageUpdateType {
     TResult? Function(String? flag)? major,
     TResult? Function(String? flag)? minor,
     TResult? Function(String? flag)? patch,
+    TResult? Function()? build,
     TResult? Function(Version version)? version,
   }) =>
       throw _privateConstructorUsedError;
@@ -40,6 +42,7 @@ mixin _$PackageUpdateType {
     TResult Function(String? flag)? major,
     TResult Function(String? flag)? minor,
     TResult Function(String? flag)? patch,
+    TResult Function()? build,
     TResult Function(Version version)? version,
     required TResult orElse(),
   }) =>
@@ -50,6 +53,7 @@ mixin _$PackageUpdateType {
     required TResult Function(_Major value) major,
     required TResult Function(_Minor value) minor,
     required TResult Function(_Patch value) patch,
+    required TResult Function(_Build value) build,
     required TResult Function(_Version value) version,
   }) =>
       throw _privateConstructorUsedError;
@@ -59,6 +63,7 @@ mixin _$PackageUpdateType {
     TResult? Function(_Major value)? major,
     TResult? Function(_Minor value)? minor,
     TResult? Function(_Patch value)? patch,
+    TResult? Function(_Build value)? build,
     TResult? Function(_Version value)? version,
   }) =>
       throw _privateConstructorUsedError;
@@ -68,6 +73,7 @@ mixin _$PackageUpdateType {
     TResult Function(_Major value)? major,
     TResult Function(_Minor value)? minor,
     TResult Function(_Patch value)? patch,
+    TResult Function(_Build value)? build,
     TResult Function(_Version value)? version,
     required TResult orElse(),
   }) =>
@@ -160,6 +166,7 @@ class _$BreakingImpl implements _Breaking {
     required TResult Function(String? flag) major,
     required TResult Function(String? flag) minor,
     required TResult Function(String? flag) patch,
+    required TResult Function() build,
     required TResult Function(Version version) version,
   }) {
     return breaking(flag);
@@ -172,6 +179,7 @@ class _$BreakingImpl implements _Breaking {
     TResult? Function(String? flag)? major,
     TResult? Function(String? flag)? minor,
     TResult? Function(String? flag)? patch,
+    TResult? Function()? build,
     TResult? Function(Version version)? version,
   }) {
     return breaking?.call(flag);
@@ -184,6 +192,7 @@ class _$BreakingImpl implements _Breaking {
     TResult Function(String? flag)? major,
     TResult Function(String? flag)? minor,
     TResult Function(String? flag)? patch,
+    TResult Function()? build,
     TResult Function(Version version)? version,
     required TResult orElse(),
   }) {
@@ -200,6 +209,7 @@ class _$BreakingImpl implements _Breaking {
     required TResult Function(_Major value) major,
     required TResult Function(_Minor value) minor,
     required TResult Function(_Patch value) patch,
+    required TResult Function(_Build value) build,
     required TResult Function(_Version value) version,
   }) {
     return breaking(this);
@@ -212,6 +222,7 @@ class _$BreakingImpl implements _Breaking {
     TResult? Function(_Major value)? major,
     TResult? Function(_Minor value)? minor,
     TResult? Function(_Patch value)? patch,
+    TResult? Function(_Build value)? build,
     TResult? Function(_Version value)? version,
   }) {
     return breaking?.call(this);
@@ -224,6 +235,7 @@ class _$BreakingImpl implements _Breaking {
     TResult Function(_Major value)? major,
     TResult Function(_Minor value)? minor,
     TResult Function(_Patch value)? patch,
+    TResult Function(_Build value)? build,
     TResult Function(_Version value)? version,
     required TResult orElse(),
   }) {
@@ -312,6 +324,7 @@ class _$MajorImpl implements _Major {
     required TResult Function(String? flag) major,
     required TResult Function(String? flag) minor,
     required TResult Function(String? flag) patch,
+    required TResult Function() build,
     required TResult Function(Version version) version,
   }) {
     return major(flag);
@@ -324,6 +337,7 @@ class _$MajorImpl implements _Major {
     TResult? Function(String? flag)? major,
     TResult? Function(String? flag)? minor,
     TResult? Function(String? flag)? patch,
+    TResult? Function()? build,
     TResult? Function(Version version)? version,
   }) {
     return major?.call(flag);
@@ -336,6 +350,7 @@ class _$MajorImpl implements _Major {
     TResult Function(String? flag)? major,
     TResult Function(String? flag)? minor,
     TResult Function(String? flag)? patch,
+    TResult Function()? build,
     TResult Function(Version version)? version,
     required TResult orElse(),
   }) {
@@ -352,6 +367,7 @@ class _$MajorImpl implements _Major {
     required TResult Function(_Major value) major,
     required TResult Function(_Minor value) minor,
     required TResult Function(_Patch value) patch,
+    required TResult Function(_Build value) build,
     required TResult Function(_Version value) version,
   }) {
     return major(this);
@@ -364,6 +380,7 @@ class _$MajorImpl implements _Major {
     TResult? Function(_Major value)? major,
     TResult? Function(_Minor value)? minor,
     TResult? Function(_Patch value)? patch,
+    TResult? Function(_Build value)? build,
     TResult? Function(_Version value)? version,
   }) {
     return major?.call(this);
@@ -376,6 +393,7 @@ class _$MajorImpl implements _Major {
     TResult Function(_Major value)? major,
     TResult Function(_Minor value)? minor,
     TResult Function(_Patch value)? patch,
+    TResult Function(_Build value)? build,
     TResult Function(_Version value)? version,
     required TResult orElse(),
   }) {
@@ -463,6 +481,7 @@ class _$MinorImpl implements _Minor {
     required TResult Function(String? flag) major,
     required TResult Function(String? flag) minor,
     required TResult Function(String? flag) patch,
+    required TResult Function() build,
     required TResult Function(Version version) version,
   }) {
     return minor(flag);
@@ -475,6 +494,7 @@ class _$MinorImpl implements _Minor {
     TResult? Function(String? flag)? major,
     TResult? Function(String? flag)? minor,
     TResult? Function(String? flag)? patch,
+    TResult? Function()? build,
     TResult? Function(Version version)? version,
   }) {
     return minor?.call(flag);
@@ -487,6 +507,7 @@ class _$MinorImpl implements _Minor {
     TResult Function(String? flag)? major,
     TResult Function(String? flag)? minor,
     TResult Function(String? flag)? patch,
+    TResult Function()? build,
     TResult Function(Version version)? version,
     required TResult orElse(),
   }) {
@@ -503,6 +524,7 @@ class _$MinorImpl implements _Minor {
     required TResult Function(_Major value) major,
     required TResult Function(_Minor value) minor,
     required TResult Function(_Patch value) patch,
+    required TResult Function(_Build value) build,
     required TResult Function(_Version value) version,
   }) {
     return minor(this);
@@ -515,6 +537,7 @@ class _$MinorImpl implements _Minor {
     TResult? Function(_Major value)? major,
     TResult? Function(_Minor value)? minor,
     TResult? Function(_Patch value)? patch,
+    TResult? Function(_Build value)? build,
     TResult? Function(_Version value)? version,
   }) {
     return minor?.call(this);
@@ -527,6 +550,7 @@ class _$MinorImpl implements _Minor {
     TResult Function(_Major value)? major,
     TResult Function(_Minor value)? minor,
     TResult Function(_Patch value)? patch,
+    TResult Function(_Build value)? build,
     TResult Function(_Version value)? version,
     required TResult orElse(),
   }) {
@@ -614,6 +638,7 @@ class _$PatchImpl implements _Patch {
     required TResult Function(String? flag) major,
     required TResult Function(String? flag) minor,
     required TResult Function(String? flag) patch,
+    required TResult Function() build,
     required TResult Function(Version version) version,
   }) {
     return patch(flag);
@@ -626,6 +651,7 @@ class _$PatchImpl implements _Patch {
     TResult? Function(String? flag)? major,
     TResult? Function(String? flag)? minor,
     TResult? Function(String? flag)? patch,
+    TResult? Function()? build,
     TResult? Function(Version version)? version,
   }) {
     return patch?.call(flag);
@@ -638,6 +664,7 @@ class _$PatchImpl implements _Patch {
     TResult Function(String? flag)? major,
     TResult Function(String? flag)? minor,
     TResult Function(String? flag)? patch,
+    TResult Function()? build,
     TResult Function(Version version)? version,
     required TResult orElse(),
   }) {
@@ -654,6 +681,7 @@ class _$PatchImpl implements _Patch {
     required TResult Function(_Major value) major,
     required TResult Function(_Minor value) minor,
     required TResult Function(_Patch value) patch,
+    required TResult Function(_Build value) build,
     required TResult Function(_Version value) version,
   }) {
     return patch(this);
@@ -666,6 +694,7 @@ class _$PatchImpl implements _Patch {
     TResult? Function(_Major value)? major,
     TResult? Function(_Minor value)? minor,
     TResult? Function(_Patch value)? patch,
+    TResult? Function(_Build value)? build,
     TResult? Function(_Version value)? version,
   }) {
     return patch?.call(this);
@@ -678,6 +707,7 @@ class _$PatchImpl implements _Patch {
     TResult Function(_Major value)? major,
     TResult Function(_Minor value)? minor,
     TResult Function(_Patch value)? patch,
+    TResult Function(_Build value)? build,
     TResult Function(_Version value)? version,
     required TResult orElse(),
   }) {
@@ -695,6 +725,132 @@ abstract class _Patch implements PackageUpdateType, _FlaggedPackageUpdateType {
   @JsonKey(ignore: true)
   _$$PatchImplCopyWith<_$PatchImpl> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$BuildImplCopyWith<$Res> {
+  factory _$$BuildImplCopyWith(
+          _$BuildImpl value, $Res Function(_$BuildImpl) then) =
+      __$$BuildImplCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$BuildImplCopyWithImpl<$Res>
+    extends _$PackageUpdateTypeCopyWithImpl<$Res, _$BuildImpl>
+    implements _$$BuildImplCopyWith<$Res> {
+  __$$BuildImplCopyWithImpl(
+      _$BuildImpl _value, $Res Function(_$BuildImpl) _then)
+      : super(_value, _then);
+}
+
+/// @nodoc
+
+class _$BuildImpl implements _Build {
+  const _$BuildImpl();
+
+  @override
+  String toString() {
+    return 'PackageUpdateType.build()';
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$BuildImpl);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function(String? flag) breaking,
+    required TResult Function(String? flag) major,
+    required TResult Function(String? flag) minor,
+    required TResult Function(String? flag) patch,
+    required TResult Function() build,
+    required TResult Function(Version version) version,
+  }) {
+    return build();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function(String? flag)? breaking,
+    TResult? Function(String? flag)? major,
+    TResult? Function(String? flag)? minor,
+    TResult? Function(String? flag)? patch,
+    TResult? Function()? build,
+    TResult? Function(Version version)? version,
+  }) {
+    return build?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function(String? flag)? breaking,
+    TResult Function(String? flag)? major,
+    TResult Function(String? flag)? minor,
+    TResult Function(String? flag)? patch,
+    TResult Function()? build,
+    TResult Function(Version version)? version,
+    required TResult orElse(),
+  }) {
+    if (build != null) {
+      return build();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Breaking value) breaking,
+    required TResult Function(_Major value) major,
+    required TResult Function(_Minor value) minor,
+    required TResult Function(_Patch value) patch,
+    required TResult Function(_Build value) build,
+    required TResult Function(_Version value) version,
+  }) {
+    return build(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Breaking value)? breaking,
+    TResult? Function(_Major value)? major,
+    TResult? Function(_Minor value)? minor,
+    TResult? Function(_Patch value)? patch,
+    TResult? Function(_Build value)? build,
+    TResult? Function(_Version value)? version,
+  }) {
+    return build?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Breaking value)? breaking,
+    TResult Function(_Major value)? major,
+    TResult Function(_Minor value)? minor,
+    TResult Function(_Patch value)? patch,
+    TResult Function(_Build value)? build,
+    TResult Function(_Version value)? version,
+    required TResult orElse(),
+  }) {
+    if (build != null) {
+      return build(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _Build implements PackageUpdateType {
+  const factory _Build() = _$BuildImpl;
 }
 
 /// @nodoc
@@ -765,6 +921,7 @@ class _$VersionImpl implements _Version {
     required TResult Function(String? flag) major,
     required TResult Function(String? flag) minor,
     required TResult Function(String? flag) patch,
+    required TResult Function() build,
     required TResult Function(Version version) version,
   }) {
     return version(this.version);
@@ -777,6 +934,7 @@ class _$VersionImpl implements _Version {
     TResult? Function(String? flag)? major,
     TResult? Function(String? flag)? minor,
     TResult? Function(String? flag)? patch,
+    TResult? Function()? build,
     TResult? Function(Version version)? version,
   }) {
     return version?.call(this.version);
@@ -789,6 +947,7 @@ class _$VersionImpl implements _Version {
     TResult Function(String? flag)? major,
     TResult Function(String? flag)? minor,
     TResult Function(String? flag)? patch,
+    TResult Function()? build,
     TResult Function(Version version)? version,
     required TResult orElse(),
   }) {
@@ -805,6 +964,7 @@ class _$VersionImpl implements _Version {
     required TResult Function(_Major value) major,
     required TResult Function(_Minor value) minor,
     required TResult Function(_Patch value) patch,
+    required TResult Function(_Build value) build,
     required TResult Function(_Version value) version,
   }) {
     return version(this);
@@ -817,6 +977,7 @@ class _$VersionImpl implements _Version {
     TResult? Function(_Major value)? major,
     TResult? Function(_Minor value)? minor,
     TResult? Function(_Patch value)? patch,
+    TResult? Function(_Build value)? build,
     TResult? Function(_Version value)? version,
   }) {
     return version?.call(this);
@@ -829,6 +990,7 @@ class _$VersionImpl implements _Version {
     TResult Function(_Major value)? major,
     TResult Function(_Minor value)? minor,
     TResult Function(_Patch value)? patch,
+    TResult Function(_Build value)? build,
     TResult Function(_Version value)? version,
     required TResult orElse(),
   }) {

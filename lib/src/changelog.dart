@@ -11,6 +11,18 @@ import 'packages.dart';
 
 part 'changelog.freezed.dart';
 
+extension VersionX on Version {
+  Version get nextPre {
+    String? pre;
+
+    if (preRelease case [final String flag, final int build]) {
+      pre = '$flag.${build + 1}';
+    }
+
+    return Version(major, minor, patch, pre: pre);
+  }
+}
+
 sealed class _FlaggedPackageUpdateType {
   String? get flag;
 }
@@ -25,7 +37,14 @@ sealed class PackageUpdateType with _$PackageUpdateType {
   const factory PackageUpdateType.minor({String? flag}) = _Minor;
   @Implements<_FlaggedPackageUpdateType>()
   const factory PackageUpdateType.patch({String? flag}) = _Patch;
+
+  const factory PackageUpdateType.build() = _Build;
+
   const factory PackageUpdateType.version(Version version) = _Version;
+
+  factory PackageUpdateType.dependencyChange(Version version) {
+    return PackageUpdateType.version(version.nextPre);
+  }
 
   static PackageUpdateType fromString(String? value) {
     final split = value?.split(' ')?..removeWhere((e) => e.isEmpty);
@@ -53,6 +72,8 @@ sealed class PackageUpdateType with _$PackageUpdateType {
       case 'fix':
       case 'patch':
         return PackageUpdateType.patch(flag: flag);
+      case 'build':
+        return const PackageUpdateType.build();
       default:
         throw ArgumentError.value(value, 'value');
     }
@@ -109,6 +130,9 @@ class PackageUpdate {
     switch (type) {
       case _Version(:final version):
         return version;
+
+      case _Build():
+        return package.version.nextPre;
 
       case final _FlaggedPackageUpdateType type:
         final flaglessNewVersion = switch (type) {
