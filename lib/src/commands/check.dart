@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:ansi/ansi.dart';
 import 'package:args/command_runner.dart';
 import 'package:melos/melos.dart';
+import 'package:path/path.dart' as p;
 
-import '../changelog.dart';
 import '../file.dart';
 import '../git.dart';
 import '../packages.dart';
@@ -31,7 +31,6 @@ class CheckCommand extends Command<void> {
 
 typedef Project = ({
   Package package,
-  PackageUpdate update,
   List<String> changedFiles,
 });
 
@@ -64,16 +63,18 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
     final changes = <String>[];
 
     for (final pubspecForChange in pubspecForChanges) {
-      if (package.pubspecFile.absoluteNormalizedPath ==
-          pubspecForChange.pubspec.absoluteNormalizedPath) {
+      // Ignore changes if they are not within the lib directory.
+      final split = p.split(pubspecForChange.changedFile);
+      if (!split.contains('lib') && !split.contains('bin')) continue;
+
+      if (p.equals(package.pubspecFile.path, pubspecForChange.pubspec.path)) {
         changes.add(pubspecForChange.changedFile);
       }
     }
 
     if (changes.isNotEmpty) {
-      final update = await PackageUpdate.tryParse(package);
-
-      if (update == null) {
+      // Check if the CHANGELOG.md of this package was modified.
+      if (!changes.any((e) => p.equals(e, package.changelog.path))) {
         stderr.writeln(
           '''
 Changes detected for package `${package.name.red()}` at `${package.pathRelativeToWorkspace}`, but no ${'CHANGELOG.md'.green()} entry found.
@@ -92,7 +93,6 @@ ${changes.map((e) => '  $e\n').join()}
       result.add(
         (
           package: package,
-          update: update,
           changedFiles: changes,
         ),
       );
