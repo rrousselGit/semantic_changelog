@@ -43,7 +43,11 @@ sealed class PackageUpdateType with _$PackageUpdateType {
   const factory PackageUpdateType.version(Version version) = _Version;
 
   factory PackageUpdateType.dependencyChange(Version version) {
-    return PackageUpdateType.version(version.nextPre);
+    if (version.isPreRelease) {
+      return PackageUpdateType.version(version.nextPre);
+    } else {
+      return PackageUpdateType.version(version.nextPatch);
+    }
   }
 
   static PackageUpdateType fromString(String? value) {
