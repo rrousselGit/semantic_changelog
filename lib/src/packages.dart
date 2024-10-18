@@ -185,23 +185,11 @@ extension PackageMeta on Package {
         // Not a version number. Likely a git/path dependency.
         if (value is! String) return;
 
-        VersionConstraint currentVersion;
-        try {
-          currentVersion = VersionConstraint.parse(value);
-        } catch (err) {
-          // Failed to parse the version, ignoring.
-          return;
-        }
-
-        final isTightConstraints = currentVersion == version;
-
         edits.add(
           _Edit(
             dependency.value.span.start.offset,
             dependency.value.span.end.offset,
-            isTightConstraints
-                ? dependencyChange.newVersion.toString()
-                : '^${dependencyChange.newVersion}',
+            dependencyChange.newVersion.toString(),
           ),
         );
       }
