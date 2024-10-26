@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:args/command_runner.dart';
-import 'package:collection/collection.dart';
 import 'package:melos/melos.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
@@ -57,7 +56,7 @@ class BumpCommand extends Command<void> {
               ),
             ],
           )
-          .whereNotNull(),
+          .nonNulls,
     );
   }
 
@@ -76,7 +75,7 @@ class BumpCommand extends Command<void> {
           .followedBy(package.devDependenciesInWorkspace.values)
           .followedBy(package.dependencyOverridesInWorkspace.values)
           .map((dependency) => versionBumps[dependency.name])
-          .whereNotNull()
+          .nonNulls
           .toList();
 
       if (dependencyChanges.isEmpty) return;

@@ -185,21 +185,11 @@ extension PackageMeta on Package {
         // Not a version number. Likely a git/path dependency.
         if (value is! String) return;
 
-        VersionConstraint currentVersion;
-        try {
-          currentVersion = VersionConstraint.parse(value);
-        } catch (err) {
-          // Failed to parse the version, ignoring.
-          return;
-        }
-
-        final isTightConstraints = currentVersion == version;
-
         edits.add(
           _Edit(
             dependency.value.span.start.offset,
             dependency.value.span.end.offset,
-            isTightConstraints
+            isTightConstraints(value)
                 ? dependencyChange.newVersion.toString()
                 : '^${dependencyChange.newVersion}',
           ),
@@ -228,5 +218,14 @@ extension PackageMeta on Package {
     newPubspecContent.write(pubspecContent.substring(lastOffset));
 
     await pubspecFile.writeAsString(newPubspecContent.toString());
+  }
+}
+
+bool isTightConstraints(String value) {
+  try {
+    Version.parse(value);
+    return true;
+  } catch (e) {
+    return false;
   }
 }
