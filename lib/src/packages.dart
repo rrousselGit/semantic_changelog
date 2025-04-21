@@ -87,15 +87,6 @@ class _Edit {
   final String content;
 }
 
-bool isTightConstraints(String value) {
-  try {
-    Version.parse(value);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
 class Package {
   Package({required this.pubspec, required this.path});
 
@@ -205,9 +196,7 @@ class Package {
           _Edit(
             dependency.value.span.start.offset,
             dependency.value.span.end.offset,
-            isTightConstraints(value)
-                ? dependencyChange.newVersion.toString()
-                : '^${dependencyChange.newVersion}',
+            dependencyChange.newVersion.toString(),
           ),
         );
       }
