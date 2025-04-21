@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:ansi/ansi.dart';
 import 'package:args/command_runner.dart';
-import 'package:melos/melos.dart';
 import 'package:path/path.dart' as p;
 
 import '../file.dart';
@@ -75,16 +74,14 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
   }
 
   final result = <Project>[];
-  await visitPackagesInDependencyOrder((package) async {
-    if (package.publishTo != null) return;
+  final workspace = await Workspace.find();
+
+  await workspace.visitPackagesInDependencyOrder((package) async {
+    if (package.pubspec.publishTo != null) return;
 
     final changes = <String>[];
 
     for (final pubspecForChange in pubspecForChanges) {
-      // Ignore changes if they are not within the lib directory.
-      final split = p.split(pubspecForChange.changedFile);
-      if (!split.contains('lib') && !split.contains('bin')) continue;
-
       if (p.equals(package.pubspecFile.path, pubspecForChange.pubspec.path)) {
         changes.add(pubspecForChange.changedFile);
       }
@@ -95,7 +92,7 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
       if (!changedFiles.any((e) => p.equals(e, package.changelog.path))) {
         stderr.writeln(
           '''
-Changes detected for package `${package.name.red()}` at `${package.pathRelativeToWorkspace}`, but no ${'CHANGELOG.md'.green()} entry found.
+Changes detected for package `${package.name.red()}` at `${package.relativePath}`, but no ${'CHANGELOG.md'.green()} entry found.
 Please add a ${'CHANGELOG.md'.green()} entry for this package.
 To do so, start the CHANGELOG.md with `## Unreleased major/minor/patch` and explain the changes introduced.
 

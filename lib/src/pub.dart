@@ -20,7 +20,7 @@ Future<PubVersionResponse?> fetchPubVersions(String packageName) async {
 }
 
 @freezed
-class PubVersionResponse with _$PubVersionResponse {
+abstract class PubVersionResponse with _$PubVersionResponse {
   factory PubVersionResponse({
     required PubVersion latest,
     required List<PubVersion> versions,
@@ -37,7 +37,7 @@ class PubVersionResponse with _$PubVersionResponse {
 }
 
 @freezed
-class PubVersion with _$PubVersion {
+abstract class PubVersion with _$PubVersion {
   factory PubVersion({
     @VersionConverter() required Version version,
   }) = _PubVersion;

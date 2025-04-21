@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:args/command_runner.dart';
-import 'package:melos/melos.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 
@@ -63,7 +62,9 @@ class BumpCommand extends Command<void> {
   Future<Map<String, PackageUpdate>> _computeBumps() async {
     final versionBumps = <String, PackageUpdate>{};
 
-    await visitPackagesInDependencyOrder((package) async {
+    final workspace = await Workspace.find();
+
+    await workspace.visitPackagesInDependencyOrder((package) async {
       var update = await PackageUpdate.tryParse(package);
       if (update != null) {
         versionBumps[package.name] = update;
@@ -71,10 +72,9 @@ class BumpCommand extends Command<void> {
       }
 
       // Check if any of the dependencies has a version bump
-      final dependencyChanges = package.dependenciesInWorkspace.values
-          .followedBy(package.devDependenciesInWorkspace.values)
-          .followedBy(package.dependencyOverridesInWorkspace.values)
-          .map((dependency) => versionBumps[dependency.name])
+      final dependencyChanges = workspace
+          .dependenciesInWorkspace(package)
+          .map((dependency) => versionBumps[dependency])
           .nonNulls
           .toList();
 
@@ -87,11 +87,11 @@ class BumpCommand extends Command<void> {
         // If a package has no updates but some dependency changes, we need to
         // bump the version of this package to match. But only do so if the
         // pubspec of the package has a version number.
-        if (package.pubSpec.version == null) return;
+        if (package.version == null) return;
         update = versionBumps[package.name] = PackageUpdate(
           package,
           lockedDependencyChanges ??
-              PackageUpdateType.dependencyChange(package.pubSpec.version!),
+              PackageUpdateType.dependencyChange(package.version!),
         );
 
         if (package.changelog.existsSync()) {
@@ -118,10 +118,10 @@ ${await package.changelog.readAsString()}''',
 extension on Package {
   bool isLockedWithDependency(String dependencyName) {
     return isLockedWithDependencyReference(
-          pubSpec.dependencies[dependencyName],
+          pubspec.dependencies[dependencyName],
         ) ||
         isLockedWithDependencyReference(
-          pubSpec.devDependencies[dependencyName],
+          pubspec.devDependencies[dependencyName],
         );
   }
 

@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:melos/melos.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import 'packages.dart';
@@ -136,14 +135,14 @@ class PackageUpdate {
         return version;
 
       case _Build():
-        return package.version.nextPre;
+        return package.version!.nextPre;
 
       case final _FlaggedPackageUpdateType type:
         final flaglessNewVersion = switch (type) {
-          _Breaking() => package.version.nextBreaking,
-          _Major() => package.version.nextMajor,
-          _Minor() => package.version.nextMinor,
-          _Patch() => package.version.nextPatch,
+          _Breaking() => package.version!.nextBreaking,
+          _Major() => package.version!.nextMajor,
+          _Minor() => package.version!.nextMinor,
+          _Patch() => package.version!.nextPatch,
         };
 
         return Version(

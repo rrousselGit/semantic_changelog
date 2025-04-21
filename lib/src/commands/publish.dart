@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
-import 'package:melos/melos.dart';
 
 import '../changelog.dart';
 import '../packages.dart';
@@ -57,8 +56,8 @@ class PublishCommand extends Command<void> {
 
   Future<List<_PackagePublish>> _computePackagesToPublish() async {
     final packagesToPublish = <_PackagePublish>[];
-
-    await visitPackagesInDependencyOrder((package) async {
+    final workspace = await Workspace.find();
+    await workspace.visitPackagesInDependencyOrder((package) async {
       if (!await _shouldPublish(package)) return;
 
       final status = await _isAlreadyPublished(package);
@@ -100,7 +99,7 @@ class PublishCommand extends Command<void> {
   }
 
   Future<bool> _shouldPublish(Package package) async {
-    if (package.publishTo.toString() == 'none') return false;
+    if (package.pubspec.publishTo.toString() == 'none') return false;
 
     final update = await PackageUpdate.tryParse(package);
     // The package is work in progress, so we don't publish it.
@@ -116,7 +115,7 @@ class PublishCommand extends Command<void> {
       return _PublishReport.firstTime;
     }
 
-    if (pubVersions.hasVersion(package.version)) {
+    if (pubVersions.hasVersion(package.version!)) {
       return _PublishReport.alreadyPublished;
     }
 

@@ -8,28 +8,25 @@ part of 'pub.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PubVersionResponseImpl _$$PubVersionResponseImplFromJson(
-        Map<String, dynamic> json) =>
-    _$PubVersionResponseImpl(
+_PubVersionResponse _$PubVersionResponseFromJson(Map<String, dynamic> json) =>
+    _PubVersionResponse(
       latest: PubVersion.fromJson(json['latest'] as Map<String, dynamic>),
       versions: (json['versions'] as List<dynamic>)
           .map((e) => PubVersion.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
-Map<String, dynamic> _$$PubVersionResponseImplToJson(
-        _$PubVersionResponseImpl instance) =>
+Map<String, dynamic> _$PubVersionResponseToJson(_PubVersionResponse instance) =>
     <String, dynamic>{
       'latest': instance.latest,
       'versions': instance.versions,
     };
 
-_$PubVersionImpl _$$PubVersionImplFromJson(Map<String, dynamic> json) =>
-    _$PubVersionImpl(
+_PubVersion _$PubVersionFromJson(Map<String, dynamic> json) => _PubVersion(
       version: const VersionConverter().fromJson(json['version'] as String),
     );
 
-Map<String, dynamic> _$$PubVersionImplToJson(_$PubVersionImpl instance) =>
+Map<String, dynamic> _$PubVersionToJson(_PubVersion instance) =>
     <String, dynamic>{
       'version': const VersionConverter().toJson(instance.version),
     };
