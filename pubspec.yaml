@@ -15,7 +15,7 @@ dependencies:
   cli_util: ">=0.3.5 <0.5.0"
   collection: ^1.17.1
   freezed_annotation: ^2.2.0
-  http: ^0.13.5
+  http: ^1.0.0
   json_annotation: ^4.8.0
   melos: ">=2.9.0 <3.0.0"
   path: ^1.8.3
@@ -31,3 +31,8 @@ dev_dependencies:
   build_runner: ^2.3.3
   freezed: ^2.3.2
   json_serializable: ^6.6.1
+
+
+dependency_overrides:
+  melos: ">=2.9.0 <3.0.0"
+  http: ^1.0.0

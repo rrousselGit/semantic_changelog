@@ -37,6 +37,15 @@ typedef Project = ({
 Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
   final pubspecForChanges = <({File pubspec, String changedFile})>[];
   for (final changedFile in changedFiles) {
+    if (p.extension(changedFile) != '.dart') {
+      // We only care about Dart files.
+      continue;
+    }
+    if (p.basenameWithoutExtension(changedFile).contains('.')) {
+      // Generated file, skip it.
+      continue;
+    }
+
     final enclosingPubspec = findAncestorFile(
       changedFile,
       'pubspec.yaml',
@@ -45,6 +54,15 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
 
     if (enclosingPubspec == null) {
       // No enclosing pubspec.yaml found, this change is not in a package.
+      continue;
+    }
+    final testFolder = p.join(
+      enclosingPubspec.parent.path,
+      'test',
+    );
+
+    if (!p.isWithin(testFolder, changedFile)) {
+      // We only count changes in the test folder.
       continue;
     }
 
