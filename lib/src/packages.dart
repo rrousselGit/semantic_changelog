@@ -213,10 +213,20 @@ class Package {
       editDependency(dependencyOverride);
     }
 
+    edits.sort((a, b) => a.start.compareTo(b.start));
+
     final newPubspecContent = StringBuffer();
     var lastOffset = 0;
     for (final edit in edits) {
-      newPubspecContent.write(pubspecContent.substring(lastOffset, edit.start));
+      try {
+        newPubspecContent
+            .write(pubspecContent.substring(lastOffset, edit.start));
+      } catch (e) {
+        stderr.writeln('Failed to write content for ${pubspecContent.substring(lastOffset)}');
+        stderr.writeln('=====');
+        stderr.writeln(edit.content);
+        rethrow;
+      }
       newPubspecContent.write(edit.content);
       lastOffset = edit.end;
     }

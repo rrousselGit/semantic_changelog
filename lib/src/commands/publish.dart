@@ -115,6 +115,13 @@ class PublishCommand extends Command<void> {
       return _PublishReport.firstTime;
     }
 
+    if (package.version == null) {
+      stderr.writeln(
+        '${ansi.red}✗${ansi.noColor} ${package.name} has no version set in pubspec.yaml.',
+      );
+      exit(1);
+    }
+
     if (pubVersions.hasVersion(package.version!)) {
       return _PublishReport.alreadyPublished;
     }
