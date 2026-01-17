@@ -4,14 +4,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:path/path.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
-import 'package:yaml/yaml.dart';
-
-import 'changelog.dart';
 
 class Workspace {
   Workspace(this.packages);
@@ -20,12 +16,21 @@ class Workspace {
     final packages = await Directory.current
         .list(recursive: true)
         .where((e) => e is File)
+        .where((e) => !e.uri.pathSegments.contains('.dart_tool'))
         .where((e) => path.basename(e.path) == 'pubspec.yaml')
         .asyncMap((file) async {
       final pubspec = await PubSpec.loadFile(file.path);
 
       return Package(pubspec: pubspec, path: file.parent.path);
     }).toList();
+
+    final names = <String>{};
+    for (final package in packages) {
+      if (names.contains(package.name)) {
+        throw Exception('Duplicate package name found: ${package.name} (path: ${package.path})');
+      }
+      names.add(package.name);
+    }
 
     return Workspace(packages);
   }
@@ -41,51 +46,26 @@ class Workspace {
   ///
   /// This visit all packages while guaranteeing that all dependencies
   /// of a package are visited first, yet visit packages only once.
-  Future<void> visitPackagesInDependencyOrder(
-    Future<void> Function(Package package) visitor,
-  ) async {
-    final futures = <Future<void>>[];
-    final visitedPackages = <Package>{};
+  Iterable<Package> packagesInDependencyOrder() sync* {
+    final visitedPackages = <String>{};
 
-    void recurs(Package package) {
-      if (visitedPackages.contains(package)) return;
-      visitedPackages.add(package);
+    bool didVisitAllPackages() =>
+        visitedPackages.containsAll(packages.map((e) => e.name));
 
-      for (final childName in dependenciesInWorkspace(package)) {
-        final child = packages.firstWhere((p) => p.name == childName);
+    while (!didVisitAllPackages()) {
+      for (final package in packages) {
+        if (visitedPackages.contains(package.name)) continue;
 
-        recurs(child);
+        final didVisitAllDependencies = visitedPackages.containsAll(
+          dependenciesInWorkspace(package),
+        );
+
+        if (!didVisitAllDependencies) continue;
+        yield package;
+        visitedPackages.add(package.name);
       }
-
-      futures.add(visitor(package));
     }
-
-    packages.forEach(recurs);
-
-    await Future.wait(futures);
   }
-}
-
-extension on Object? {
-  R? safeCast<R>() {
-    final that = this;
-    if (that is R) return that;
-    return null;
-  }
-}
-
-extension on YamlMap {
-  MapEntry<dynamic, YamlNode>? findEntry(String key) {
-    return nodes.entries.firstWhereOrNull((e) => e.key.toString() == key);
-  }
-}
-
-class _Edit {
-  _Edit(this.start, this.end, this.content);
-
-  final int start;
-  final int end;
-  final String content;
 }
 
 class Package {
@@ -144,96 +124,5 @@ class Package {
     }
 
     return result.stdout.toString().isNotEmpty;
-  }
-
-  Future<void> updatePubspec(
-    Version newVersion, {
-    required Set<PackageUpdate> dependencyChanges,
-  }) async {
-    final edits = <_Edit>[];
-
-    final pubspecContent = await pubspecFile.readAsString();
-    final pubspecYaml = loadYamlNode(
-      pubspecContent,
-      sourceUrl: pubspecFile.uri,
-    );
-
-    final versionNode = pubspecYaml.safeCast<YamlMap>()?.findEntry('version');
-
-    final dependenciesNode = pubspecYaml
-        .safeCast<YamlMap>()
-        ?.nodes['dependencies']
-        .safeCast<YamlMap>();
-    final devDependenciesNode = pubspecYaml
-        .safeCast<YamlMap>()
-        ?.nodes['dev_dependencies']
-        .safeCast<YamlMap>();
-    final dependencyOverridesNode = pubspecYaml
-        .safeCast<YamlMap>()
-        ?.nodes['dependency_overrides']
-        .safeCast<YamlMap>();
-
-    // TODO handle "name:" placed after dependencies & co
-
-    if (versionNode != null) {
-      edits.add(
-        _Edit(
-          versionNode.value.span.start.offset,
-          versionNode.value.span.end.offset,
-          newVersion.toString(),
-        ),
-      );
-    }
-
-    for (final dependencyChange in dependencyChanges) {
-      void editDependency(MapEntry<dynamic, YamlNode>? dependency) {
-        if (dependency == null) return;
-
-        final value = dependency.value.value;
-        // Not a version number. Likely a git/path dependency.
-        if (value is! String) return;
-
-        edits.add(
-          _Edit(
-            dependency.value.span.start.offset,
-            dependency.value.span.end.offset,
-            dependencyChange.newVersion().toString(),
-          ),
-        );
-      }
-
-      final dependency =
-          dependenciesNode?.findEntry(dependencyChange.package.name);
-      final devDependency =
-          devDependenciesNode?.findEntry(dependencyChange.package.name);
-      final dependencyOverride =
-          dependencyOverridesNode?.findEntry(dependencyChange.package.name);
-
-      editDependency(dependency);
-      editDependency(devDependency);
-      editDependency(dependencyOverride);
-    }
-
-    edits.sort((a, b) => a.start.compareTo(b.start));
-
-    final newPubspecContent = StringBuffer();
-    var lastOffset = 0;
-    for (final edit in edits) {
-      try {
-        newPubspecContent
-            .write(pubspecContent.substring(lastOffset, edit.start));
-      } catch (e) {
-        stderr.writeln(
-            'Failed to write content for ${pubspecContent.substring(lastOffset)}');
-        stderr.writeln('=====');
-        stderr.writeln(edit.content);
-        rethrow;
-      }
-      newPubspecContent.write(edit.content);
-      lastOffset = edit.end;
-    }
-    newPubspecContent.write(pubspecContent.substring(lastOffset));
-
-    await pubspecFile.writeAsString(newPubspecContent.toString());
   }
 }

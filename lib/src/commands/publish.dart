@@ -57,8 +57,8 @@ class PublishCommand extends Command<void> {
   Future<List<_PackagePublish>> _computePackagesToPublish() async {
     final packagesToPublish = <_PackagePublish>[];
     final workspace = await Workspace.find();
-    await workspace.visitPackagesInDependencyOrder((package) async {
-      if (!await _shouldPublish(package)) return;
+    for (final package in workspace.packagesInDependencyOrder()) {
+      if (!await _shouldPublish(package)) continue;
 
       final status = await _isAlreadyPublished(package);
       switch (status) {
@@ -73,7 +73,7 @@ class PublishCommand extends Command<void> {
           // Already on pub, nothing to do
           break;
       }
-    });
+    }
     return packagesToPublish;
   }
 

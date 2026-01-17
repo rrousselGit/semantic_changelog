@@ -25,6 +25,7 @@ class BumpCommand extends Command<void> {
       'The following packages have been updated:\n',
     );
     for (final update in versionBumps) {
+      if (update.newVersion() == null) continue;
       buffer.writeln(
         '${update.package.name.padRight(longestPackageNameLength)} : ${update.package.version} -> ${update.newVersion()}',
       );
@@ -46,15 +47,9 @@ class BumpCommand extends Command<void> {
     await Future.wait<void>(
       versionBumps.expand(
         (update) {
-          final newVersion = update.newVersion();
-          if (newVersion == null) return <Future<void>>[];
-
           return [
             if (update.changelogPatch case final changelog?) changelog.run(),
-            update.package.updatePubspec(
-              newVersion,
-              dependencyChanges: update.dependencyChanges,
-            ),
+            update.updatePubspec(),
           ];
         },
       ).nonNulls,
@@ -75,9 +70,7 @@ class BumpCommand extends Command<void> {
           .where((update) => update.newVersion() != null);
     }
 
-    await workspace.visitPackagesInDependencyOrder((package) async {
-      print(package.name);
-      // if (package.pubspec.publishTo.toString() == 'none') return;
+    for (final package in workspace.packagesInDependencyOrder()) {
       if (versionForPackage.containsKey(package.name)) {
         throw Exception(
           'Duplicate package name found: ${package.name}',
@@ -97,6 +90,9 @@ class BumpCommand extends Command<void> {
               .followedBy(package.pubspec.dependencyOverrides.keys),
         ),
       );
+
+      // Skip changelog changes for unpublished packages
+      if (package.pubspec.publishTo.toString() == 'none') continue;
 
       if (changelog?.type != null || update.dependencyChanges.isNotEmpty) {
         // Patch the changelog to replace the Unreleased with the version number
@@ -140,59 +136,8 @@ class BumpCommand extends Command<void> {
           () => package.changelog.writeAsString(newChangelog.toString()),
         );
       }
-    });
+    }
 
     return versionForPackage.values.map((e) => e.$1).nonNulls.toList();
-
-    // final versionBumps = <String, PackageUpdate>{};
-
-//     await workspace.visitPackagesInDependencyOrder((package) async {
-//       final changelog = Changelog.tryParse(package) ?? Changelog([]);
-
-//       var update = await PackageUpdate.tryParse(package, changelog);
-//       if (update != null) {
-//         versionBumps[package.name] = update;
-//         // We continue to compute dependency changes in case, if any
-//       }
-
-//       // Check if any of the dependencies has a version bump
-//       final dependencyChanges = workspace
-//           .dependenciesInWorkspace(package)
-//           .map((dependency) => versionBumps[dependency])
-//           .nonNulls
-//           .toList();
-
-//       if (dependencyChanges.isEmpty) return;
-
-//       if (update == null) {
-//         // If a package has no updates but some dependency changes, we need to
-//         // bump the version of this package to match. But only do so if the
-//         // pubspec of the package has a version number.
-//         if (package.version == null) return;
-//         update = versionBumps[package.name] = PackageUpdate(
-//           package,
-//           PackageUpdateType.dependencyChange(package.version!),
-//           changelog,
-//         );
-
-//         if (package.changelog.existsSync()) {
-//           // Patch the changelog to add a new section for the new version
-//           update.changelogPatch = Patch(
-//             () async => package.changelog.writeAsString(
-//               '''
-// ${update!.newVersionChangelogHeader}
-
-// ${dependencyChanges.map((e) => '- `${e.package.name}` upgraded to `${e.newVersion}`').join('\n')}
-
-// ${await package.changelog.readAsString()}''',
-//             ),
-//           );
-//         }
-//       }
-
-    // update.dependencyChanges.addAll(dependencyChanges);
-    // });
-
-    // return versionBumps;
   }
 }

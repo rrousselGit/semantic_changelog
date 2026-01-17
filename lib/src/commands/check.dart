@@ -76,8 +76,8 @@ Future<List<Project>> _groupChangedFiles(List<String> changedFiles) async {
   final result = <Project>[];
   final workspace = await Workspace.find();
 
-  await workspace.visitPackagesInDependencyOrder((package) async {
-    if (package.pubspec.publishTo != null) return;
+  for (final package in workspace.packagesInDependencyOrder()) {
+    if (package.pubspec.publishTo != null) continue;
 
     final changes = <String>[];
 
@@ -102,7 +102,7 @@ ${changes.map((e) => '  $e\n').join()}
 ''',
         );
         exitCode = 1;
-        return;
+        continue;
       }
 
       result.add(
@@ -112,7 +112,7 @@ ${changes.map((e) => '  $e\n').join()}
         ),
       );
     }
-  });
+  }
 
   return result;
 }
