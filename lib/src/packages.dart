@@ -5,9 +5,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:glob/glob.dart';
-import 'package:glob/list_local_fs.dart';
 import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec/pubspec.dart';
 import 'package:yaml/yaml.dart';
@@ -18,8 +17,10 @@ class Workspace {
   Workspace(this.packages);
 
   static Future<Workspace> find() async {
-    final packages = await Glob('**/pubspec.yaml', recursive: true)
-        .list()
+    final packages = await Directory.current
+        .list(recursive: true)
+        .where((e) => e is File)
+        .where((e) => path.basename(e.path) == 'pubspec.yaml')
         .asyncMap((file) async {
       final pubspec = await PubSpec.loadFile(file.path);
 
@@ -196,7 +197,7 @@ class Package {
           _Edit(
             dependency.value.span.start.offset,
             dependency.value.span.end.offset,
-            dependencyChange.newVersion.toString(),
+            dependencyChange.newVersion().toString(),
           ),
         );
       }
@@ -222,7 +223,8 @@ class Package {
         newPubspecContent
             .write(pubspecContent.substring(lastOffset, edit.start));
       } catch (e) {
-        stderr.writeln('Failed to write content for ${pubspecContent.substring(lastOffset)}');
+        stderr.writeln(
+            'Failed to write content for ${pubspecContent.substring(lastOffset)}');
         stderr.writeln('=====');
         stderr.writeln(edit.content);
         rethrow;

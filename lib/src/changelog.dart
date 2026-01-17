@@ -49,6 +49,19 @@ sealed class PackageUpdateType with _$PackageUpdateType {
     }
   }
 
+  static PackageUpdateType? fromChangelog(Changelog changelog) {
+    final firstLine = changelog.changelogContent.firstOrNull;
+    if (firstLine == null || !firstLine.startsWith('## Unreleased ')) {
+      return null;
+    }
+
+    // Obtain the keyword after "## Unreleased"
+    final flagRegex = RegExp('## Unreleased (.*)');
+    final flag = flagRegex.firstMatch(firstLine)?.group(1)?.trim();
+
+    return PackageUpdateType.fromString(flag);
+  }
+
   static PackageUpdateType fromString(String? value) {
     final split = value?.split(' ')?..removeWhere((e) => e.isEmpty);
 
@@ -83,54 +96,75 @@ sealed class PackageUpdateType with _$PackageUpdateType {
   }
 }
 
+extension<T> on List<T> {
+  Iterable<ListSlice<T>> sliceWhile(
+    bool Function(T element) test,
+  ) sync* {
+    var start = 0;
+    int? index;
+    for (final entry in indexed.skip(1)) {
+      index = entry.$1;
+      if (!test(this[index])) {
+        yield slice(start, index);
+        start = index;
+      }
+    }
+
+    if (index != start) {
+      yield slice(start);
+    }
+  }
+}
+
+class Changelog {
+  Changelog(this.changelogContent);
+  static final empty = Changelog([]);
+
+  final List<String> changelogContent;
+  late final PackageUpdateType? type = PackageUpdateType.fromChangelog(this);
+
+  Iterable<({String header, String content})> sections() {
+    return changelogContent
+        .sliceWhile((line) => !line.startsWith('## '))
+        .map((slice) {
+      return (
+        header: slice.first,
+        content: slice.slice(1).join('\n').trim(),
+      );
+    });
+  }
+
+  static Future<Changelog?> tryParse(Package package) async {
+    try {
+      final lines = await package.changelog.readAsLines();
+
+      return Changelog(lines);
+    } on PathNotFoundException {
+      return null;
+    }
+  }
+
+  String newVersionChangelogHeader(String newVersion) {
+    return '## $newVersion - ${DateTime.now().toIso8601String().split('T').first}';
+  }
+}
+
 class Patch {
   Patch(this.run);
   final Future<void> Function() run;
 }
 
 class PackageUpdate {
-  PackageUpdate(this.package, this.type);
-
-  static Future<PackageUpdate?> tryParse(Package package) async {
-    List<String> changelogContent;
-    try {
-      changelogContent = await package.changelog.readAsLines();
-    } on FileSystemException {
-      // File not found
-      return null;
-    }
-
-    final firstLine = changelogContent.firstOrNull;
-    if (firstLine == null || !firstLine.startsWith('## Unreleased ')) {
-      return null;
-    }
-
-    // Obtain the keyword after "## Unreleased"
-    final flagRegex = RegExp('## Unreleased (.*)');
-    final flag = flagRegex.firstMatch(firstLine)?.group(1)?.trim();
-
-    final updateType = PackageUpdateType.fromString(flag);
-    final update = PackageUpdate(package, updateType);
-
-    // Patch the changelog to replace the Unreleased with the version number
-    final newChangelog = StringBuffer();
-    newChangelog.writeln(update.newVersionChangelogHeader);
-    changelogContent.skip(1).forEach(newChangelog.writeln);
-
-    update.changelogPatch = Patch(
-      () => package.changelog.writeAsString(newChangelog.toString()),
-    );
-
-    return update;
-  }
+  PackageUpdate(this.package, this.changelog);
 
   final Package package;
-  final PackageUpdateType type;
   final Set<PackageUpdate> dependencyChanges = {};
+  final Set<PackageUpdate> otherDependencyChanges = {};
+  final Changelog? changelog;
   Patch? changelogPatch;
 
-  late final Version newVersion = () {
-    switch (type) {
+  Version? newVersion() {
+    switch (changelog?.type) {
       case _Version(:final version):
         return version;
 
@@ -151,10 +185,23 @@ class PackageUpdate {
           flaglessNewVersion.patch,
           pre: type.flag,
         );
-    }
-  }();
 
-  String get newVersionChangelogHeader {
-    return '## $newVersion - ${DateTime.now().toIso8601String().split('T').first}';
+      case null when dependencyChanges.isNotEmpty:
+        final version = package.version!;
+
+        if (version.isPreRelease) return version.nextPre;
+        return version.nextPatch;
+
+      case null:
+        return null; // No update
+    }
+  }
+
+  String? newVersionChangelogHeader() {
+    final newVersion = this.newVersion();
+    final changelog = this.changelog;
+
+    if (newVersion == null || changelog == null) return null;
+    return changelog.newVersionChangelogHeader(newVersion.toString());
   }
 }

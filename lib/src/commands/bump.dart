@@ -3,8 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:args/command_runner.dart';
-import 'package:pub_semver/pub_semver.dart';
-import 'package:pubspec/pubspec.dart';
+import 'package:collection/collection.dart';
 
 import '../changelog.dart';
 import '../packages.dart';
@@ -18,16 +17,16 @@ class BumpCommand extends Command<void> {
   @override
   String get name => 'bump';
 
-  void _logChanges(Map<String, PackageUpdate> versionBumps) {
+  void _logChanges(List<PackageUpdate> versionBumps) {
     final longestPackageNameLength =
-        versionBumps.keys.map((e) => e.length).reduce(max);
+        versionBumps.map((e) => e.package.name.length).reduce(max);
 
     final buffer = StringBuffer(
       'The following packages have been updated:\n',
     );
-    for (final update in versionBumps.values) {
+    for (final update in versionBumps) {
       buffer.writeln(
-        '${update.package.name.padRight(longestPackageNameLength)} : ${update.package.version} -> ${update.newVersion}',
+        '${update.package.name.padRight(longestPackageNameLength)} : ${update.package.version} -> ${update.newVersion()}',
       );
     }
 
@@ -36,115 +35,164 @@ class BumpCommand extends Command<void> {
 
   @override
   FutureOr<void>? run() async {
-    final versionBumps = await _computeBumps();
+    final versionBumps = await _computePatches();
     await _applyBumps(versionBumps);
     _logChanges(versionBumps);
   }
 
-  Future<void> _applyBumps(Map<String, PackageUpdate> versionBumps) async {
-    await Future.wait(
-      versionBumps.values
-          .expand(
-            (update) => [
-              update.changelogPatch?.run(),
-              Future(
-                () => update.package.updatePubspec(
-                  update.newVersion,
-                  dependencyChanges: update.dependencyChanges,
-                ),
-              ),
-            ],
-          )
-          .nonNulls,
+  Future<void> _applyBumps(
+    List<PackageUpdate> versionBumps,
+  ) async {
+    await Future.wait<void>(
+      versionBumps.expand(
+        (update) {
+          final newVersion = update.newVersion();
+          if (newVersion == null) return <Future<void>>[];
+
+          return [
+            if (update.changelogPatch case final changelog?) changelog.run(),
+            update.package.updatePubspec(
+              newVersion,
+              dependencyChanges: update.dependencyChanges,
+            ),
+          ];
+        },
+      ).nonNulls,
     );
   }
 
-  Future<Map<String, PackageUpdate>> _computeBumps() async {
-    final versionBumps = <String, PackageUpdate>{};
-
+  Future<List<PackageUpdate>> _computePatches() async {
     final workspace = await Workspace.find();
 
-    await workspace.visitPackagesInDependencyOrder((package) async {
-      var update = await PackageUpdate.tryParse(package);
-      if (update != null) {
-        versionBumps[package.name] = update;
-        // We continue to compute dependency changes in case, if any
-      }
+    final versionForPackage = <String, (PackageUpdate, Changelog?)>{};
 
-      // Check if any of the dependencies has a version bump
-      final dependencyChanges = workspace
-          .dependenciesInWorkspace(package)
-          .map((dependency) => versionBumps[dependency])
+    Iterable<PackageUpdate> dependencyChanges(Iterable<String> dependencies) {
+      return dependencies
+          .map((dependency) {
+            return versionForPackage[dependency]?.$1;
+          })
           .nonNulls
-          .toList();
+          .where((update) => update.newVersion() != null);
+    }
 
-      if (dependencyChanges.isEmpty) return;
-
-      final lockedDependencyChanges =
-          _findLockedDependencyChanges(package, dependencyChanges);
-
-      if (update == null) {
-        // If a package has no updates but some dependency changes, we need to
-        // bump the version of this package to match. But only do so if the
-        // pubspec of the package has a version number.
-        if (package.version == null) return;
-        update = versionBumps[package.name] = PackageUpdate(
-          package,
-          lockedDependencyChanges ??
-              PackageUpdateType.dependencyChange(package.version!),
+    await workspace.visitPackagesInDependencyOrder((package) async {
+      print(package.name);
+      // if (package.pubspec.publishTo.toString() == 'none') return;
+      if (versionForPackage.containsKey(package.name)) {
+        throw Exception(
+          'Duplicate package name found: ${package.name}',
         );
-
-        if (package.changelog.existsSync()) {
-          // Patch the changelog to add a new section for the new version
-          update.changelogPatch = Patch(
-            () async => package.changelog.writeAsString(
-              '''
-${update!.newVersionChangelogHeader}
-
-${dependencyChanges.map((e) => '- `${e.package.name}` upgraded to `${e.newVersion}`').join('\n')}
-
-${await package.changelog.readAsString()}''',
-            ),
-          );
-        }
       }
 
-      update.dependencyChanges.addAll(dependencyChanges);
-    });
-    return versionBumps;
-  }
-}
+      final changelog = await Changelog.tryParse(package);
+      final update = PackageUpdate(package, changelog);
+      versionForPackage[package.name] = (update, changelog);
 
-extension on Package {
-  bool isLockedWithDependency(String dependencyName) {
-    return isLockedWithDependencyReference(
-          pubspec.dependencies[dependencyName],
-        ) ||
-        isLockedWithDependencyReference(
-          pubspec.devDependencies[dependencyName],
+      update.dependencyChanges.addAll(
+        dependencyChanges(package.pubspec.dependencies.keys),
+      );
+      update.otherDependencyChanges.addAll(
+        dependencyChanges(
+          package.pubspec.devDependencies.keys
+              .followedBy(package.pubspec.dependencyOverrides.keys),
+        ),
+      );
+
+      if (changelog?.type != null || update.dependencyChanges.isNotEmpty) {
+        // Patch the changelog to replace the Unreleased with the version number
+        final newChangelog = StringBuffer();
+        newChangelog.writeln(update.newVersionChangelogHeader());
+
+        final sections = changelog?.sections().toList();
+        if (sections?.firstOrNull case final section?
+            when changelog?.type != null) {
+          if (changelog?.type == null) {
+            newChangelog.writeln();
+            newChangelog.writeln(section.header);
+          }
+          newChangelog.writeln();
+          newChangelog.writeln(section.content);
+          newChangelog.writeln();
+        }
+
+        if (update.dependencyChanges.isNotEmpty) {
+          newChangelog.writeln('### Dependency changes');
+          newChangelog.writeln();
+          for (final dependencyChange in update.dependencyChanges) {
+            newChangelog.writeln(
+              '- `${dependencyChange.package.name}` upgraded to `${dependencyChange.newVersion()}`',
+            );
+          }
+          newChangelog.writeln();
+        }
+
+        final otherSections =
+            changelog?.type == null ? sections : sections?.slice(1);
+        for (final section
+            in otherSections ?? <({String content, String header})>[]) {
+          newChangelog.writeln(section.header);
+          newChangelog.writeln();
+          newChangelog.writeln(section.content);
+          newChangelog.writeln();
+        }
+
+        update.changelogPatch = Patch(
+          () => package.changelog.writeAsString(newChangelog.toString()),
         );
+      }
+    });
+
+    return versionForPackage.values.map((e) => e.$1).nonNulls.toList();
+
+    // final versionBumps = <String, PackageUpdate>{};
+
+//     await workspace.visitPackagesInDependencyOrder((package) async {
+//       final changelog = Changelog.tryParse(package) ?? Changelog([]);
+
+//       var update = await PackageUpdate.tryParse(package, changelog);
+//       if (update != null) {
+//         versionBumps[package.name] = update;
+//         // We continue to compute dependency changes in case, if any
+//       }
+
+//       // Check if any of the dependencies has a version bump
+//       final dependencyChanges = workspace
+//           .dependenciesInWorkspace(package)
+//           .map((dependency) => versionBumps[dependency])
+//           .nonNulls
+//           .toList();
+
+//       if (dependencyChanges.isEmpty) return;
+
+//       if (update == null) {
+//         // If a package has no updates but some dependency changes, we need to
+//         // bump the version of this package to match. But only do so if the
+//         // pubspec of the package has a version number.
+//         if (package.version == null) return;
+//         update = versionBumps[package.name] = PackageUpdate(
+//           package,
+//           PackageUpdateType.dependencyChange(package.version!),
+//           changelog,
+//         );
+
+//         if (package.changelog.existsSync()) {
+//           // Patch the changelog to add a new section for the new version
+//           update.changelogPatch = Patch(
+//             () async => package.changelog.writeAsString(
+//               '''
+// ${update!.newVersionChangelogHeader}
+
+// ${dependencyChanges.map((e) => '- `${e.package.name}` upgraded to `${e.newVersion}`').join('\n')}
+
+// ${await package.changelog.readAsString()}''',
+//             ),
+//           );
+//         }
+//       }
+
+    // update.dependencyChanges.addAll(dependencyChanges);
+    // });
+
+    // return versionBumps;
   }
-
-  bool isLockedWithDependencyReference(
-    DependencyReference? dependencyReference,
-  ) {
-    if (dependencyReference is! HostedReference) return false;
-
-    return dependencyReference.versionConstraint is Version;
-  }
-}
-
-PackageUpdateType? _findLockedDependencyChanges(
-  Package package,
-  List<PackageUpdate> dependencyChanges,
-) {
-  PackageUpdateType? result;
-  for (final lockedDependency in dependencyChanges
-      .where((e) => package.isLockedWithDependency(e.package.name))) {
-    if (result != null && result != lockedDependency.type) return null;
-
-    result = lockedDependency.type;
-  }
-
-  return result;
 }

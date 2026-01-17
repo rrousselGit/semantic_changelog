@@ -101,9 +101,9 @@ class PublishCommand extends Command<void> {
   Future<bool> _shouldPublish(Package package) async {
     if (package.pubspec.publishTo.toString() == 'none') return false;
 
-    final update = await PackageUpdate.tryParse(package);
+    final changelog = await Changelog.tryParse(package);
     // The package is work in progress, so we don't publish it.
-    if (update != null) return false;
+    if (changelog?.type != null) return false;
 
     return true;
   }
